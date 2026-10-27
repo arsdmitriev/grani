@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation and live examples
+    url: https://grani.arseni.work
+    about: How each component behaves, with its API and a live example.
+  - name: A security problem
+    url: https://github.com/arsdmitriev/grani/security/policy
+    about: Report it privately, never in a public issue.

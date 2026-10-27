@@ -1,0 +1,148 @@
+{
+  "name": "grani-ui",
+  "version": "0.1.0",
+  "description": "Interaction patterns for admin apps, and the Vue 3 components that keep them: focus, late answers, loading, errors. Most proved by a test. Tailwind CSS 4, typed, SSR-ready.",
+  "keywords": [
+    "interaction-patterns",
+    "ux-patterns",
+    "accessibility",
+    "vue",
+    "vue3",
+    "vue-components",
+    "component-library",
+    "ui",
+    "admin",
+    "admin-dashboard",
+    "tailwind",
+    "tailwindcss",
+    "tailwindcss-v4",
+    "data-table",
+    "datatable",
+    "table",
+    "forms",
+    "select",
+    "datepicker",
+    "charts",
+    "typescript",
+    "ssr"
+  ],
+  "license": "MIT",
+  "homepage": "https://grani.arseni.work",
+  "bugs": "https://github.com/arsdmitriev/grani/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arsdmitriev/grani.git"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "typesVersions": {
+    "*": {
+      "i18n": [
+        "./dist/i18n/index.d.ts"
+      ],
+      "test": [
+        "./dist/test/index.d.ts"
+      ],
+      "resolver": [
+        "./resolver.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "assets",
+    "dist",
+    "components",
+    "composables",
+    "i18n",
+    "scripts/contrast.mjs",
+    "types",
+    "utils",
+    "docs/guides",
+    "README.md",
+    "CHANGELOG.md",
+    "llms.txt",
+    "llms",
+    "index.ts",
+    "plugin.ts",
+    "resolver.js",
+    "resolver.d.ts",
+    "!**/*.spec.ts"
+  ],
+  "peerDependencies": {
+    "@playwright/test": "^1.39.0",
+    "tailwindcss": "^4.1.0",
+    "vue": "^3.5.2"
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.48.0",
+    "d3-array": "^3.2.4",
+    "d3-shape": "^3.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/d3-array": "^3.2.2",
+    "@types/d3-shape": "^3.2.0",
+    "@types/node": "^26.6.4",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/test-utils": "^2.4.6",
+    "axe-core": "^4.13.0",
+    "happy-dom": "^20.9.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.6.0",
+    "unplugin-vue-components": "^32.1.0",
+    "vite": "^8.3.0",
+    "vitest": "^4.1.5",
+    "vue": "^3.5.43",
+    "vue-router": "^5.3.1",
+    "vue-tsc": "^3.3.11"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./style.css": "./assets/css/index.css",
+    "./theme.css": "./assets/css/theme.css",
+    "./classes/*.css": "./dist/classes/*/index.css",
+    "./base.css": "./assets/css/base.css",
+    "./i18n": {
+      "types": "./dist/i18n/index.d.ts",
+      "default": "./dist/i18n/index.js"
+    },
+    "./test": {
+      "types": "./dist/test/index.d.ts",
+      "default": "./dist/test/index.js"
+    },
+    "./resolver": {
+      "types": "./resolver.d.ts",
+      "default": "./resolver.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "preferUnplugged": true,
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    }
+  },
+  "author": "Arseni Dmitriev (https://arseni.work)",
+  "scripts": {
+    "build": "vite build --config scripts/lib.config.mjs && vue-tsc -p tsconfig.build.json && node scripts/dtsExtensions.mjs && node scripts/classes.mjs",
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test:shuffle": "vitest run --project unit --sequence.shuffle --sequence.seed=4242 && vitest run --project unit --sequence.shuffle --sequence.seed=7",
+    "gates": "npm run typecheck && npm test && npm run test:shuffle && npm run build && node test/surface.mjs && node scripts/contrast.mjs",
+    "prepack": "npm run build && node scripts/package-texts.mjs",
+    "prepublishOnly": "npm run gates",
+    "example": "vite --config examples/vite/vite.config.ts --port 3021"
+  }
+}

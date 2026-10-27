@@ -1,0 +1,13 @@
+/* The same as `grani-ui/style.css` (`index.css`) without its three `@source` lines: the font, the tokens
+   and the theme, the motion vocabulary, and none of the components' classes. An app that uses a few
+   components imports `grani-ui/classes/<Name>.css` for each, the classes of that component and of what
+   it is built from, and its stylesheet carries those alone (README, "## Use"). */
+@import './fonts.css';
+@import './tokens.css';
+@import './motion.css';
+
+/* Which of grani's stylesheets came: in development `createGrani()` reads it, and with this one it
+   expects no class of its own, they come by component (utils/stylesCheck). */
+:root {
+  --grani-styles: theme;
+}

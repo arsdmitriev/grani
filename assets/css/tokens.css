@@ -1,0 +1,845 @@
+/*
+ * Design tokens. Two layers:
+ *   1. raw scales, colors in :root;
+ *   2. semantic tokens in @theme (light; dark in .dark): Tailwind turns them into classes,
+ *      bg-surface, text-fg-muted, border-danger-border..., each reading its variable at runtime,
+ *      so a theme or a brand swaps the value and every class follows.
+ *
+ * The brand ships with a default (lavender). A consumer overrides the eight
+ * `--color-brand*` variables in its own stylesheet with any color; it wins over the
+ * theme layer wherever it loads. Translucency is color-mix(), as Tailwind's own `/50`.
+ */
+
+:root {
+  /* Space. The inset of a window and a popover, one number on every side and between the
+     buttons of a window's footer: `0.75rem` for a dense product, `1.5rem` for a roomy one. */
+  --space-overlay: 1rem;
+  /* The gutter of a card (`--space-surface`) and of a roomy surface: a card at `md`, a drawer. */
+  --space-surface: 1rem;
+  --space-surface-md: 1.5rem;
+  /* A drawer's gutter: its body, the space around its lines, the sides of its header and footer. 1.5rem; 1rem when dense. */
+  --space-drawer: 1.5rem;
+  /* The focus ring: a quiet neutral halo, the ring color at 25%, below the 3:1 WCAG asks of a
+     focus mark; `createGrani({ focus: 'strong' })` sets the strong one below. Inset where a box
+     clips an outer halo; danger on a dangerous control; invalid on a field in error; selected on a
+     chosen card. Every focus ring grani draws reads one of them. Set again in .dark, so a dark
+     subtree reads its own colors. */
+  --ui-ring: 0 0 0 3px color-mix(in oklab, var(--color-ring) 25%, transparent);
+  --ui-ring-inset: inset 0 0 0 3px color-mix(in oklab, var(--color-ring) 25%, transparent);
+  --ui-ring-danger: 0 0 0 3px color-mix(in oklab, var(--color-danger) 50%, transparent);
+  --ui-ring-invalid: 0 0 0 3px color-mix(in oklab, var(--color-danger) 30%, transparent);
+  --ui-ring-selected: 0 0 0 3px color-mix(in oklab, var(--color-brand-solid) 35%, transparent);
+
+  --lavender-50: rgb(245 240 255);
+  --lavender-100: rgb(234 224 255);
+  --lavender-200: rgb(213 197 252);
+  --lavender-300: rgb(191 165 250);
+  --lavender-400: rgb(165 131 245);
+  --lavender-500: rgb(140 97 238);
+  --lavender-600: rgb(115 71 217);
+  --lavender-700: rgb(91 54 178);
+  --lavender-800: rgb(68 39 138);
+  --lavender-900: rgb(46 26 94);
+  --lavender-950: rgb(26 15 54);
+
+  --amber-50: rgb(255 247 230);
+  --amber-400: rgb(247 179 70);
+  --amber-500: rgb(245 166 61);
+  --amber-600: rgb(217 123 6);
+  --amber-700: rgb(180 94 4);
+  --amber-900: rgb(110 54 8);
+
+  /* Signal blue: info and links to look at. */
+  --info-50: rgb(232 243 255);
+  --info-100: rgb(212 232 255);
+  --info-200: rgb(178 212 255);
+  --info-300: rgb(132 183 255);
+  --info-400: rgb(84 142 255);
+  --info-500: rgb(45 101 255);
+  --info-600: rgb(10 56 255);
+  --info-700: rgb(1 44 255);
+  --info-800: rgb(5 45 222);
+  --info-900: rgb(15 45 160);
+  --info-950: rgb(9 24 93);
+
+  /* Tone scales: green 1DCA65, gold FFC31A,
+     red F63D48 at step 500; 50 and 100 are the 500 step at 10% and 22% on white. */
+  --success-50: rgb(232 250 240);
+  --success-100: rgb(205 243 221);
+  --success-500: rgb(29 202 101);
+  --success-600: rgb(18 167 81);
+  --success-700: rgb(18 131 66);
+  --success-800: rgb(19 104 56);
+  --success-900: rgb(18 85 48);
+  --success-950: rgb(4 47 24);
+
+  --danger-50: rgb(254 236 237);
+  --danger-100: rgb(253 212 215);
+  --danger-500: rgb(246 61 72);
+  --danger-600: rgb(217 27 38);
+  --danger-700: rgb(191 22 32);
+  --danger-800: rgb(158 22 30);
+  --danger-900: rgb(131 25 31);
+  --danger-950: rgb(71 8 12);
+
+  --warning-50: rgb(255 249 232);
+  --warning-100: rgb(255 242 205);
+  --warning-400: rgb(255 195 26);
+  --warning-500: rgb(255 165 0);
+  --warning-600: rgb(227 126 0);
+  --warning-700: rgb(203 92 1);
+  --warning-800: rgb(152 65 8);
+  --warning-900: rgb(125 54 10);
+  --warning-950: rgb(72 26 0);
+}
+
+@theme {
+  /* Shape. Consumers override these the way they override the brand:
+     `--radius-control: 0` gives a square product, `1rem` a soft one. */
+  --radius-control: 0.5rem;
+  --radius-badge: 0.375rem;
+  --radius-card: 0.5rem;
+  --radius-overlay: 0.75rem;
+  --radius-pill: 9999px;
+
+  /* Brand: `brand` is ink and non-text fill, `brand-solid` is the fill that
+     carries a label. Light theme: they coincide. */
+  --color-brand: var(--lavender-600);
+  --color-brand-hover: var(--lavender-700);
+  --color-brand-fg: rgb(255 255 255);
+  --color-brand-solid: var(--color-brand);
+  --color-brand-solid-fg: var(--color-brand-fg);
+  --color-brand-subtle: var(--lavender-50);
+  --color-brand-subtle-fg: var(--lavender-700);
+  --color-brand-ring: var(--lavender-300);
+
+  --color-bg: rgb(249 250 251);
+  --color-surface: rgb(255 255 255);
+  --color-surface-muted: rgb(249 250 251);
+
+  --color-fg: rgb(17 24 39);
+  --color-fg-muted: rgb(107 114 128);
+  --color-fg-subtle: rgb(156 163 175);
+  --color-fg-inverse: rgb(255 255 255);
+
+  --color-border: rgb(229 231 235);
+  --color-border-strong: rgb(209 213 219);
+
+  /* Focus ring: a quiet neutral halo, the same on both themes. Deliberately
+     below the 3:1 non-text floor; waived in scripts/contrast.mjs. */
+  /* Painted at 25% in the focus contract: a halo you barely notice, never a gray frame. */
+  --color-ring: rgb(156 163 175);
+
+  --color-control-bg: var(--color-surface-muted);
+  --color-control-border: var(--color-border-strong);
+  --color-control-border-hover: rgb(156 163 175);
+  --color-disabled-bg: rgb(243 244 246);
+  --color-disabled-fg: rgb(156 163 175);
+  --color-placeholder: var(--color-fg-muted);
+  --color-selected: var(--color-brand-subtle);
+  --color-selected-fg: var(--color-brand-subtle-fg);
+  --color-backdrop: rgb(0 0 0);
+  --color-skeleton: var(--color-border-strong);
+
+  --color-accent: var(--amber-500);
+  --color-accent-fg: rgb(255 255 255);
+  --color-accent-subtle: var(--amber-50);
+
+  /* Tones. Each has base (solid, icon, border), fg (text on base), subtle
+     (soft fill), subtle-fg (text on subtle) and border. */
+  --color-neutral-subtle: rgb(243 244 246);
+  --color-neutral-subtle-fg: rgb(31 41 55);
+  --color-neutral-border: rgb(229 231 235);
+
+  /* The fill is the first step that carries white text at AA; the plate is
+     the 50 step with the 700/800 step as text. The fill token is a fill only:
+     glyphs and borders on the surface use `-border`, text uses `-subtle-fg`. */
+  --color-success: var(--success-700);
+  --color-success-fg: rgb(255 255 255);
+  --color-success-subtle: var(--success-100);
+  --color-success-subtle-fg: var(--success-800);
+  --color-success-border: var(--success-700);
+
+  --color-danger: var(--danger-600);
+  --color-danger-fg: rgb(255 255 255);
+  --color-danger-subtle: var(--danger-100);
+  --color-danger-subtle-fg: var(--danger-700);
+  --color-danger-border: var(--danger-600);
+
+  /* Warning cannot carry white text, so the fill takes the 900 step of its own
+     scale as text: dark brown, not black, and the button stays in the family. */
+  --color-warning: var(--warning-400);
+  --color-warning-fg: var(--warning-950);
+  --color-warning-text: var(--warning-950);
+  --color-warning-subtle: var(--warning-100);
+  --color-warning-subtle-fg: var(--warning-950);
+  --color-warning-border: var(--warning-700);
+
+  --color-info: var(--info-600);
+  --color-info-fg: rgb(255 255 255);
+  --color-info-subtle: var(--info-100);
+  --color-info-subtle-fg: var(--info-700);
+  --color-info-border: var(--info-600);
+  /* The indicator dot of a badge: one step per tone, read on the page and on the plate alike. */
+  --color-neutral-dot: var(--color-fg-muted);
+  --color-brand-dot: var(--color-brand-solid);
+  --color-success-dot: var(--success-600);
+  --color-warning-dot: var(--warning-500);
+  --color-danger-dot: var(--danger-600);
+  --color-info-dot: var(--info-500);
+
+  /* Series of a chart, in the order they are taken: the brand first, then hues far from it and
+     from each other. Five at most; a sixth series goes into `other`. Each holds 3:1 on the surface
+     as a line (scripts/contrast.mjs). Meaning is `tone`, not a series color: a loss is danger. */
+  --color-chart-1: var(--color-brand);
+  --color-chart-2: var(--amber-600);
+  --color-chart-3: rgb(2 132 199);
+  --color-chart-4: rgb(219 39 119);
+  --color-chart-5: rgb(13 148 136);
+  --color-chart-other: var(--color-fg-muted);
+
+  /* grani's own type: its font, given to grani's elements in the base below, never to the app's
+     (`font-grani` for an element of the app). The sizes and their line heights are Tailwind's,
+     each component sets its own with the size (`text-sm/5.5`), so the app's `text-sm` stays its own.
+     The spacing roles below read the public `--space-*` variables above, so `p-overlay` follows an
+     override of `--space-overlay`. */
+  --font-grani: 'Golos Text', ui-sans-serif, system-ui, sans-serif;
+  --spacing-overlay: var(--space-overlay);
+  --spacing-surface: var(--space-surface);
+  --spacing-surface-md: var(--space-surface-md);
+  --spacing-drawer: var(--space-drawer);
+}
+
+/* Layers of the interface, bottom to top. Named, so a component says `z-popover`, never a number. */
+@utility z-base {
+  z-index: 0;
+}
+@utility z-sticky {
+  z-index: 30;
+}
+@utility z-nav {
+  z-index: 40;
+}
+@utility z-overlay {
+  z-index: 50;
+}
+@utility z-modal {
+  z-index: 60;
+}
+@utility z-popover {
+  z-index: 70;
+}
+@utility z-tooltip {
+  z-index: 75;
+}
+@utility z-toast {
+  z-index: 80;
+}
+
+.dark {
+  --color-brand: var(--lavender-400);
+  --color-brand-hover: var(--lavender-300);
+  --color-brand-fg: rgb(17 24 39);
+  /* Dark theme: the label fill stays dense so white text reads on it. */
+  --color-brand-solid: rgb(130 88 232);
+  --color-brand-solid-fg: rgb(255 255 255);
+  --color-brand-subtle: var(--lavender-900);
+  --color-brand-subtle-fg: var(--lavender-200);
+  --color-brand-ring: var(--lavender-700);
+
+  --color-bg: rgb(17 24 39);
+  --color-surface: rgb(31 41 55);
+  --color-surface-muted: rgb(24 32 46);
+
+  --color-fg: rgb(243 244 246);
+  --color-fg-muted: rgb(156 163 175);
+  --color-fg-subtle: rgb(107 114 128);
+  --color-fg-inverse: rgb(17 24 39);
+
+  --color-border: rgb(55 65 81);
+  --color-border-strong: rgb(75 85 99);
+  --color-ring: rgb(107 114 128);
+  --ui-ring: 0 0 0 3px color-mix(in oklab, var(--color-ring) 25%, transparent);
+  --ui-ring-inset: inset 0 0 0 3px color-mix(in oklab, var(--color-ring) 25%, transparent);
+  --ui-ring-danger: 0 0 0 3px color-mix(in oklab, var(--color-danger) 50%, transparent);
+  --ui-ring-invalid: 0 0 0 3px color-mix(in oklab, var(--color-danger) 30%, transparent);
+  --ui-ring-selected: 0 0 0 3px color-mix(in oklab, var(--color-brand-solid) 35%, transparent);
+
+  --color-control-bg: rgb(55 65 81);
+  --color-control-border: var(--color-border-strong);
+  --color-control-border-hover: rgb(107 114 128);
+  --color-disabled-bg: rgb(31 41 55);
+  --color-disabled-fg: rgb(107 114 128);
+  --color-placeholder: rgb(166 173 185);
+  --color-selected: var(--color-brand-subtle);
+  --color-selected-fg: var(--color-brand-subtle-fg);
+  --color-backdrop: rgb(0 0 0);
+  --color-skeleton: var(--color-border-strong);
+
+  --color-accent: var(--amber-400);
+  --color-accent-subtle: var(--amber-900);
+
+  --color-neutral-subtle: rgb(55 65 81);
+  --color-neutral-subtle-fg: rgb(209 213 219);
+  --color-neutral-border: rgb(75 85 99);
+
+  --color-success: var(--success-700);
+  --color-success-fg: rgb(255 255 255);
+  /* Dark plates: the 500 step at 35% into the background, so they separate
+     from the surface; warning mixes its 500 (orange), the gold turns olive. */
+  --color-success-subtle: rgb(21 86 61);
+  --color-success-subtle-fg: rgb(119 223 163);
+  --color-success-border: var(--success-500);
+
+  --color-danger: var(--danger-600);
+  --color-danger-fg: rgb(255 255 255);
+  --color-danger-subtle: rgb(97 37 51);
+  --color-danger-subtle-fg: rgb(250 139 145);
+  --color-danger-border: var(--danger-500);
+
+  --color-warning: var(--warning-400);
+  --color-warning-fg: var(--warning-950);
+  --color-warning-text: var(--warning-400);
+  --color-warning-subtle: rgb(100 73 25);
+  --color-warning-subtle-fg: rgb(255 219 118);
+  --color-warning-border: var(--warning-400);
+
+  --color-info: var(--info-500);
+  --color-info-fg: rgb(255 255 255);
+  --color-info-subtle: rgb(27 51 115);
+  --color-info-subtle-fg: var(--info-300);
+  --color-info-border: var(--info-400);
+  --color-success-dot: var(--success-500);
+  --color-warning-dot: var(--warning-400);
+  --color-danger-dot: var(--danger-500);
+  --color-info-dot: var(--info-400);
+
+  --color-chart-1: var(--color-brand);
+  --color-chart-2: var(--amber-400);
+  --color-chart-3: rgb(56 189 248);
+  --color-chart-4: rgb(244 114 182);
+  --color-chart-5: rgb(45 212 191);
+  --color-chart-other: var(--color-fg-muted);
+}
+
+/* The strong focus mark, `createGrani({ focus: 'strong' })`: a ring of the text color over a gap
+   of the surface, 3:1 or more against any surface, on either theme and with any brand (inside an
+   element, the text color at its edge and the surface within, which a brand fill meets at 3:1); on a
+   dangerous control or a field in error the danger ink, which each theme keeps legible (the danger
+   fill reads 2.9:1 on the dark surface). A dark subtree takes it in its own colors. */
+:root[data-grani-focus='strong'],
+[data-grani-focus='strong'] .dark {
+  --ui-ring: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-fg);
+  --ui-ring-inset: inset 0 0 0 2px var(--color-fg), inset 0 0 0 4px var(--color-surface);
+  --ui-ring-danger: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-danger-subtle-fg);
+  --ui-ring-invalid: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-danger-subtle-fg);
+  --ui-ring-selected: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-fg);
+}
+
+/*
+ * The base of grani's own elements. Every element a component draws carries `data-grani` (the
+ * template compiler puts it on, `scripts/elements.mjs`), and these rules reach only those: a
+ * border color, a pointer, the focus contract, the scrollbars, the font's rendering, the scheme
+ * and the accent. Nothing of the app's own is touched; `grani-ui/base.css` gives the same to the
+ * whole app, for an app that wants it. In Tailwind's base layer, so a utility on the element wins.
+ * Each selector is the one base.css has, its subject narrowed by `:where([data-grani])`, which adds
+ * no weight: the two files order their rules alike.
+ */
+
+/* On a touch screen a field whose text is under 16px makes the phone zoom into it on focus, and
+   the page stays zoomed. The text a person types is 16px there, or larger where the field's own
+   is; a mouse keeps the field's size. Outside the layers, so the field's own size utility does not
+   win over it. */
+@media (pointer: coarse) {
+  :is(
+    input:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file']),
+    textarea,
+    select
+  ):where([data-grani]) {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* Tailwind 4 leaves a border in currentColor and a button with the arrow cursor; grani keeps one
+   border color and a pointer on anything pressable. */
+@layer base {
+  /* The font of a grani component, on its outermost element only: what stands inside inherits it,
+     so a class on the component (`font-mono`) reaches its label. The app's own elements keep
+     theirs (`grani-ui/base.css` gives it to the page); `--font-grani` sets another. It weighs one
+     attribute, the rest of the selector none: Tailwind's base gives a button, a field and a select
+     `font: inherit` with a tag's weight, and a component whose outermost element is one of them
+     (UiButton) would take the page's font instead. */
+  [data-grani]:where(:not([data-grani] *)) {
+    font-family: var(--font-grani);
+  }
+  :where([data-grani]),
+  :where([data-grani])::after,
+  :where([data-grani])::before,
+  :where([data-grani])::file-selector-button {
+    border-color: var(--color-border);
+  }
+  button:where([data-grani]):not(:disabled, [aria-disabled='true']),
+  [role='button']:where([data-grani]):not(:disabled, [aria-disabled='true']) {
+    cursor: pointer;
+  }
+}
+
+/*
+ * Focus contract. One rule for every interactive element: a neutral halo,
+ * red for `[data-focus='danger']`. Fields show it on :focus (you live in a
+ * field while typing); everything else only on :focus-visible.
+ * Inside the layer, selectors start with `:root` to outweigh CSS reset plugins that style the
+ * same attribute selectors in the same layer.
+ */
+@layer base {
+  :root [type='text']:where([data-grani]):focus,
+  :root [type='email']:where([data-grani]):focus,
+  :root [type='password']:where([data-grani]):focus,
+  :root [type='search']:where([data-grani]):focus,
+  :root [type='number']:where([data-grani]):focus,
+  :root [type='url']:where([data-grani]):focus,
+  :root [type='tel']:where([data-grani]):focus,
+  :root [type='date']:where([data-grani]):focus,
+  :root [type='time']:where([data-grani]):focus,
+  :root textarea:where([data-grani]):focus,
+  :root select:where([data-grani]):focus {
+    outline: none;
+    box-shadow: var(--ui-ring);
+    border-color: var(--color-border-strong);
+  }
+
+  :root [aria-invalid='true']:where([data-grani]):focus {
+    border-color: var(--color-danger);
+  }
+
+  :root
+    :where(
+      a[href],
+      button,
+      summary,
+      [role='switch'],
+      [role='tab'],
+      [tabindex]:not([tabindex='-1'])
+    ):where([data-grani]):focus-visible {
+    outline: none;
+    box-shadow: var(--ui-ring);
+  }
+
+  /* A menu item, and an option that takes the focus itself (a time picker's column), show their
+     focus as the lit band of the panel list, not as a ring round a row. */
+  :root [role='menuitem']:where([data-grani]):focus-visible,
+  :root [role='option']:where([data-grani]):focus-visible {
+    box-shadow: none;
+  }
+
+  /* Attribute selectors carry their own weight here so they beat a reset
+     plugin's `[type='checkbox']:focus` of the same specificity. */
+  :root [type='checkbox']:where([data-grani]):focus-visible,
+  :root [type='radio']:where([data-grani]):focus-visible {
+    outline: none;
+    box-shadow: var(--ui-ring);
+  }
+
+  :root [data-focus='danger']:where([data-grani]):focus-visible {
+    box-shadow: var(--ui-ring-danger);
+  }
+
+  /* Every scroll in the library looks the same: a clear track, a thumb in the strong border
+     color that darkens under the pointer. The standard property is enough for Firefox and
+     Chromium; the -webkit- pseudo elements are for Safari. Taps on iOS do not flash a gray box
+     over controls. The font renders as it was drawn, and native parts follow the theme. */
+  :where([data-grani]) {
+    scrollbar-color: var(--color-border-strong) transparent;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
+    accent-color: var(--color-brand);
+  }
+  :where(:root.dark [data-grani]) {
+    color-scheme: dark;
+  }
+  :where([data-grani])::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  :where([data-grani])::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  :where([data-grani])::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background: var(--color-border-strong) padding-box;
+  }
+  :where([data-grani])::-webkit-scrollbar-thumb:hover {
+    background: var(--color-fg-subtle) padding-box;
+  }
+}
+
+/* Forced colors drop fills and shadows. The focus outline is the floor of every focusable element
+   of grani, in the base layer as the focus contract is; the forced colors at the end of the file
+   give grani's own marks (`.ui-*`) back their state. */
+@layer base {
+  @media (forced-colors: active) {
+    :where(
+        a[href],
+        button,
+        summary,
+        input,
+        select,
+        textarea,
+        [tabindex]:not([tabindex='-1'])
+      ):where([data-grani]):focus-visible {
+      outline: 2px solid;
+      outline-offset: 1px;
+    }
+  }
+}
+
+/*
+ * Rules for grani's own elements, each found by a `.ui-*` hook or a `data-*` attribute the
+ * component puts on. Where no utility on the element sets the same property, the rule sits in
+ * the components layer, so a utility the app adds to the element wins.
+ */
+
+/* A button is never wider than what holds it: a word with no space (a file name from the data) is
+   cut inside its plate instead of widening the page. A class the component puts on, so the app's own
+   `max-w-*` on the button wins whatever its spelling: a utility beside it in the same layer would win
+   or lose by Tailwind's order of classes. */
+@layer components {
+  .ui-button {
+    max-width: 100%;
+  }
+}
+
+/* A side rail, a menu: the bar shows only while the pointer or the focus is inside. A strip of
+   tabs or chips: it scrolls, it shows no bar. Classes a component puts on, so a utility beside
+   them wins. */
+@layer components {
+  .ui-scroll-hover {
+    scrollbar-color: transparent transparent;
+  }
+  .ui-scroll-hover:hover,
+  .ui-scroll-hover:focus-within {
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+  .ui-scroll-hover::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+  .ui-scroll-hover:hover::-webkit-scrollbar-thumb,
+  .ui-scroll-hover:focus-within::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong) padding-box;
+  }
+  .ui-scroll-hidden {
+    scrollbar-width: none;
+  }
+  .ui-scroll-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* A spinner is 16px until something says otherwise: a height class on it
+   (`h-*`, `size-*`, important too), or a host rule such as a badge's
+   `[&>svg]:h-3`. A width alone does not count, and neither does a prefixed class
+   (`md:h-6`): such a host sizes it with a child rule. No `:root` here on purpose:
+   the selector must stay lighter than a host's child rule, and the rule sits in the components
+   layer so a utility on the host wins. */
+@layer components {
+  .ui-spinner:where(:not([class*=' h-'], [class*=' size-'], [class*=' !h-'], [class*=' !size-'])) {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+/* Muted words in a selected row read in the selection's ink: muted gray on the selection's tint
+   falls under 4.5:1 (4.33 on the default brand), and the tint is the app's brand. The pair
+   `selected-fg` on `selected` is the one the contrast check holds for every brand. */
+@layer components {
+  :root .ui-row-selected {
+    --color-fg-muted: var(--color-selected-fg);
+  }
+}
+
+@layer components {
+  /* A list divides its rows (UiList): a line above every row that follows a row, or the block a
+     row opened, drawn over the row's own top air, so a row is one height wherever it stands. A
+     framed row carries no `data-row`: no line above it, none after it. The item is positioned for
+     the line and for the tone's edge of a notice drawn as a row. */
+  :root .ui-list > li {
+    position: relative;
+  }
+  :root .ui-list > li:has(> :is([data-row], [data-row-block])) + li:has(> [data-row])::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    border-top: 1px solid var(--color-border);
+    pointer-events: none;
+  }
+
+  /* An invalid dropzone wears the soft red halo a capsule does at rest. */
+  :root .ui-dropzone[data-invalid]:not(:has(:disabled)) {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-danger) 15%, transparent);
+  }
+
+  /* The field row of UiListField is its own focus: the row takes the band, its field no halo.
+     The search row of a list in a panel (a select's, a filter's) is a line of the panel, not a
+     field: its caret is the focus. */
+  :root .ui-capsule :where(input, select, textarea):focus,
+  :root .ui-capsule [role='combobox']:focus-visible,
+  :root [data-ui-panel] :where(input):focus,
+  :root [data-list-search] :where(input):focus,
+  :root .ui-add-row :where(input):focus {
+    box-shadow: none;
+  }
+
+  /* Chrome paints an autofilled value yellow over the capsule. The paint is pushed
+     under an inset shadow of the control fill; the ink and the caret keep the token. */
+  :root .ui-capsule :where(input):-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--color-control-bg) inset;
+    -webkit-text-fill-color: var(--color-fg);
+    caret-color: var(--color-fg);
+  }
+
+  /* The ring that cuts an indicator out of its host takes the surface behind it:
+     a muted card or a dark header sets `--ui-indicator-ring` once. */
+  .ui-indicator-mark {
+    --tw-ring-color: var(--ui-indicator-ring, var(--color-surface));
+  }
+}
+
+/*
+ * A state the element also draws with a utility of its own (a capsule's border color, a field
+ * label's ink, a card's border, a segment's shadow) stays outside a layer: in one, that utility
+ * would win over the state. These and the forced colors below reach only grani's elements.
+ */
+/* A capsule (UiInput) owns the ring while its value has focus; the ring stays
+   neutral and an invalid field says so with its border. The value draws no second
+   ring, and neither does the filter input of a floating panel: the panel is what
+   opened. A button addon (the eye, a clear) keeps its own ring from the base
+   contract, so a Tab onto it is visible: the capsule ring does not follow it. */
+:root .ui-capsule:has(:is(input, textarea):focus, [role='combobox']:focus-visible) {
+  box-shadow: var(--ui-ring);
+  border-color: var(--color-border-strong);
+}
+/* A field's label mutes when the control in it is disabled. A button in `#meta` is not the
+   control, and a field around a control with no `disabled` (an editable region) keeps its ink. */
+:root .ui-field:has(:disabled):not(:has(:enabled:not([data-field-meta] *))) > .ui-field-label,
+:root
+  .ui-field:has(:disabled):not(:has(:enabled:not([data-field-meta] *)))
+  > div
+  > .ui-field-label {
+  color: var(--color-fg-muted);
+}
+/* An invalid capsule wears a soft red halo at rest and a stronger one in focus. A disabled
+   one keeps the disabled plate: the state it is in now wins over the mark it carried. */
+:root .ui-capsule[data-invalid]:not(:has(:disabled)) {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-danger) 15%, transparent);
+}
+:root .ui-capsule[data-invalid]:has(:is(input, textarea):focus, [role='combobox']:focus-visible) {
+  border-color: var(--color-danger);
+  box-shadow: var(--ui-ring-invalid);
+}
+/* A button that holds a value of a form (UiDateRange in a field) wears the same halo when its
+   field is in error. */
+:root .ui-button[data-invalid]:enabled {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-danger) 15%, transparent);
+}
+:root .ui-button[data-invalid]:focus-visible {
+  border-color: var(--color-danger);
+  box-shadow: var(--ui-ring-invalid);
+}
+/* A bare field (UiInput `variant="bare"`) is a window's header, not a capsule: no ring, no halo;
+   the caret in the one field of the window is its focus, the window's line under it its edge. */
+:root .ui-capsule[data-bare],
+:root .ui-capsule[data-bare]:has(:is(input, textarea):focus) {
+  box-shadow: none;
+}
+/* A code cell (UiCodeInput) is not the control; the invisible input over it is.
+   The pointer meets the input, never a cell: the hover border is drawn from the root.
+   The cell that takes the next character wears the ring while the input has focus. */
+:root .ui-code:hover .ui-code-cell:not([data-invalid], [data-disabled]) {
+  border-color: var(--color-control-border-hover);
+}
+:root .ui-code:focus-within .ui-code-cell[data-next] {
+  box-shadow: var(--ui-ring);
+  border-color: var(--color-border-strong);
+}
+/* An invalid code wears the soft red halo a capsule does at rest. */
+:root .ui-code-cell[data-invalid]:not([data-disabled]) {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-danger) 15%, transparent);
+}
+:root .ui-code:focus-within .ui-code-cell[data-invalid][data-next] {
+  box-shadow: var(--ui-ring-invalid);
+}
+
+/* A choice card (a radio drawn as a card) says "selected" the way a capsule says
+   "focused": a brand border and a soft brand halo. Keyboard focus on an
+   unselected card is the neutral ring; on the selected one the halo deepens. A click
+   focuses the radio too, and draws no ring: only keyboard focus does. */
+:root .ui-choice:has(:focus-visible) {
+  box-shadow: var(--ui-ring);
+  border-color: var(--color-border-strong);
+}
+:root .ui-choice[data-selected] {
+  border-color: var(--color-brand-solid);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-brand-solid) 20%, transparent);
+}
+:root .ui-choice[data-selected]:has(:focus-visible) {
+  box-shadow: var(--ui-ring-selected);
+}
+:root .ui-choice :where(input):focus-visible {
+  box-shadow: none;
+}
+
+/* A segment (UiRadioGroup segmented) says "selected" with its plate, not a halo:
+   only keyboard focus draws the neutral ring, on the segment, never on the hidden radio. */
+:root .ui-segment:has(:focus-visible) {
+  box-shadow: var(--ui-ring);
+}
+:root .ui-segment :where(input):focus-visible {
+  box-shadow: none;
+}
+/* The strong ring is 4px, past the 3px a small bar keeps between a segment and its frame's edge,
+   where the strip that scrolls the segments clips it: it is drawn inward, as a tab's is. */
+[data-grani-focus='strong'] .ui-segment:has(:focus-visible) {
+  box-shadow: var(--ui-ring-inset);
+}
+
+@media (forced-colors: active) {
+  /* A progressbar draws with fills, which forced colors drop: the track takes an outline, the
+     reached part the highlight, an empty segment its own outline. */
+  :root .ui-progress {
+    outline: 1px solid CanvasText;
+  }
+  :root .ui-progress > * {
+    forced-color-adjust: none;
+    outline: 1px solid CanvasText;
+  }
+  :root .ui-progress > [data-filled] {
+    background: Highlight;
+  }
+
+  /* The selected tab is marked by its ink and an underline shadow, which forced colors drop. */
+  :root .ui-tab[aria-selected='true'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* A skeleton is a fill on the surface, which forced colors turn into the canvas: the shape
+     of what comes takes a thin outline, so a loading list is not an empty column. */
+  :root .ui-skeleton {
+    outline: 1px solid GrayText;
+  }
+
+  /* The current place of the app shell's navigation is a plate too: the highlight says it. */
+  :root .ui-current[aria-current='page'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* A pressed toggle (UiButton, UiIconButton, the eye of a field, a chart's legend) is a plate:
+     system colors drop it, so on would read as off. The highlight says it. */
+  :root .ui-toggle[aria-pressed='true'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+
+  /* A button off with a reason keeps the focus, so it is natively enabled and the system draws it
+     as any other button: the gray text of a disabled one says it is off, its hint says why. A
+     pressed one keeps the highlight, whose text gray would not read on. */
+  :root .ui-toggle[aria-disabled='true']:not([aria-busy='true']):not([aria-pressed='true']) {
+    color: GrayText;
+    border-color: GrayText;
+  }
+
+  /* A checked box or radio is a brand fill under a light glyph: both vanished. The fill takes
+     the highlight, the glyph or the dot the highlight's text. */
+  :root .ui-mark-on {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+  :root .ui-mark-on svg,
+  :root .ui-mark-on ~ svg {
+    forced-color-adjust: none;
+    color: HighlightText;
+  }
+  :root .ui-mark-on ~ .ui-mark-dot {
+    forced-color-adjust: none;
+    background: HighlightText;
+  }
+  /* A chosen radio that is off keeps its dot, in the gray text of a disabled control. */
+  :root input:disabled ~ .ui-mark-dot {
+    forced-color-adjust: none;
+    background: GrayText;
+  }
+
+  /* A segment's radio lies invisible over it, so the segment says what the radio would: the
+     chosen one takes the highlight (its plate and shadow are dropped), an off one the gray text,
+     and keyboard focus the outline its radio cannot show. */
+  :root .ui-segment:has(:disabled) {
+    color: GrayText;
+  }
+  :root .ui-segment[data-selected] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+  :root .ui-segment[data-selected]:has(:disabled) {
+    background: GrayText;
+    color: Canvas;
+  }
+  :root .ui-segment:has(:focus-visible) {
+    outline: 2px solid CanvasText;
+    outline-offset: 1px;
+  }
+
+  /* A selected row is a tint, which forced colors drop: a highlight frame inside the row says it. */
+  :root .ui-row-selected {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  /* A switch is two fills; system colors turn both into the background and the
+     control vanished. A border draws the track, the thumb and "on" take their own. */
+  :root .ui-switch {
+    border: 1px solid ButtonText;
+    /* The border is inside the track: the padding gives it back, so the thumb keeps 2px. */
+    padding: calc(0.125rem - 1px);
+  }
+  :root .ui-switch[aria-checked='true'] {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+  :root .ui-switch-thumb {
+    forced-color-adjust: none;
+    background: ButtonText;
+  }
+  :root .ui-switch[aria-checked='true'] .ui-switch-thumb {
+    background: HighlightText;
+  }
+  :root .ui-switch:disabled {
+    border-color: GrayText;
+  }
+  :root .ui-switch:disabled .ui-switch-thumb {
+    background: GrayText;
+  }
+  :root .ui-switch[aria-busy='true']:not(:disabled) .ui-switch-thumb {
+    background: transparent;
+  }
+  :root .ui-switch[aria-busy='true'] .ui-switch-thumb svg {
+    color: ButtonText;
+  }
+  :root .ui-switch[aria-busy='true']:disabled .ui-switch-thumb svg {
+    color: Canvas;
+  }
+}

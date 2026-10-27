@@ -1,0 +1,49 @@
+name: Bug report
+description: A component does something other than its documentation says.
+body:
+  - type: markdown
+    attributes:
+      value: There is no promise of an answer or a date. A report someone can run is the one that gets fixed.
+  - type: input
+    id: version
+    attributes:
+      label: grani version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: stack
+    attributes:
+      label: Vue, Tailwind and the bundler
+      placeholder: Vue 3.5.13, Tailwind 4.1.4, Vite 6.3 (or webpack, Nuxt)
+    validations:
+      required: true
+  - type: dropdown
+    id: ssr
+    attributes:
+      label: Rendered on a server
+      options:
+        - 'No'
+        - 'Yes'
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: What you ran
+      description: The smallest code or the steps that show it.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: With the browser and its version.
+    validations:
+      required: true

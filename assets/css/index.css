@@ -1,0 +1,17 @@
+/* Everything the components need beside Tailwind itself: the font, the tokens and the theme, the
+   motion vocabulary, and where the classes are, so the app's build generates them. It reaches
+   grani's elements only (`data-grani`), but for reduced motion; `base.css` is the base for the
+   whole app, optional and imported after it.
+   In the app: `@import 'tailwindcss'; @import 'grani-ui/style.css';`. */
+@import './fonts.css';
+@import './tokens.css';
+@import './motion.css';
+@source '../../components';
+@source '../../utils';
+@source '../../composables';
+
+/* Which of grani's stylesheets came: in development `createGrani()` reads it, and with this one it
+   expects the classes of every component in the sheet (utils/stylesCheck). */
+:root {
+  --grani-styles: all;
+}

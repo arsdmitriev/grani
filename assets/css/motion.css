@@ -1,0 +1,350 @@
+/*
+ * Motion vocabulary. The Tailwind theme references these values
+ * (`duration-fast` is `var(--ui-dur-fast)`), so a number changes in one place.
+ *
+ *   fast   - something small moves in place: popover, tooltip, disclosure
+ *   normal - a plate appears or fades: bar, toast, a backdrop leaving
+ *   travel - a panel travels its own width: drawer, stacked screen; a backdrop rising
+ *   scene  - a whole picture gives way to the next, seen now and then: the player's frame between
+ *            two pages of an example; slow enough to read as a dissolve, not a blink
+ */
+:root {
+  --ui-dur-fast: 120ms;
+  --ui-dur-normal: 160ms;
+  --ui-dur-travel: 200ms;
+  --ui-dur-scene: 400ms;
+  --ui-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ui-ease-enter: cubic-bezier(0, 0, 0, 1);
+  --ui-ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  /* A plate over the page fades up from nothing: a slow start reads as rising, a fast one as a pop. */
+  --ui-ease-fade: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reveal in place: a block under a setting row, a hint under a field. The height
+   travels through `grid-template-rows: 0fr -> 1fr`, so the content states its own
+   height and nothing is measured or guessed. The `fast` step: a small move in
+   place, not a panel arriving. The inner element needs `min-height: 0` to shrink. */
+.ui-reveal-enter-active,
+.ui-reveal-leave-active {
+  display: grid;
+  transition:
+    grid-template-rows var(--ui-dur-fast) var(--ui-ease-standard),
+    opacity var(--ui-dur-fast) var(--ui-ease-standard);
+}
+.ui-reveal-enter-active > *,
+.ui-reveal-leave-active > * {
+  min-height: 0;
+  overflow: hidden;
+}
+.ui-reveal-enter-from,
+.ui-reveal-leave-to {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.ui-reveal-enter-to,
+.ui-reveal-leave-from {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+/*
+ * Reduced motion is honoured once, globally, including the consumer's own
+ * code. 0.01ms instead of `none` so Vue's <Transition> still receives its
+ * end events. Opt out of the rule with `data-motion-keep`.
+ * The rule sits in the base layer so it reaches nothing it was not meant to by weight alone; its
+ * `!important` in a layer outweighs every `!important` outside layers and in later layers, so
+ * the app's utilities cannot undo it. The exceptions (busy indicators, the refused-close ring)
+ * live in the same layer, where the more specific selector wins.
+ */
+@layer base {
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* Busy indicators keep moving, slower: a frozen spinner reads as a hang. */
+    .animate-spin,
+    [data-motion-keep] {
+      animation-duration: 1.6s !important;
+      animation-iteration-count: infinite !important;
+    }
+
+    /* The skeleton's shimmer is the sign a first load runs: it keeps on, one pulse in 3 s. */
+    .ui-skeleton {
+      animation-duration: 3s !important;
+      animation-iteration-count: infinite !important;
+    }
+
+    /* Reduced motion mutes the shake, and a refused close would go silent: the window
+       flashes a ring instead, which does not move. */
+    .ui-shake {
+      animation: ui-refuse-ring 400ms var(--ui-ease-standard) !important;
+    }
+  }
+}
+
+/* A panel anchored to its trigger (select, menu, tooltip) grows out of the
+   trigger: scale, not a slide from above. */
+.ui-popover-enter-active {
+  transition:
+    opacity var(--ui-dur-fast) var(--ui-ease-enter),
+    transform var(--ui-dur-fast) var(--ui-ease-enter);
+}
+.ui-popover-leave-active {
+  transition:
+    opacity calc(var(--ui-dur-fast) * 0.6) var(--ui-ease-exit),
+    transform calc(var(--ui-dur-fast) * 0.6) var(--ui-ease-exit);
+}
+.ui-popover-enter-from,
+.ui-popover-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+/* A drawn caret (UiCodeInput) blinks like the native one: on and off, not a
+   fade. Tailwind's pulse dims to half and reads as a dead bar. */
+.ui-caret {
+  animation: ui-caret-blink 1s step-end infinite;
+}
+@keyframes ui-caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* A modal: the backdrop rises on the `travel` step with a slow start, the window settles from a
+   hair smaller with it; it leaves on the `normal` step. A panel that slides in from above reads as
+   a notification. */
+.ui-modal-enter-active {
+  transition: opacity var(--ui-dur-travel) var(--ui-ease-fade);
+}
+.ui-modal-leave-active {
+  transition: opacity var(--ui-dur-normal) var(--ui-ease-standard);
+}
+/* A leaving backdrop takes no clicks: the page under it is already back on top. */
+.ui-modal-leave-active {
+  pointer-events: none;
+}
+.ui-modal-enter-active .ui-modal-panel {
+  transition: transform var(--ui-dur-travel) var(--ui-ease-fade);
+}
+.ui-modal-leave-active .ui-modal-panel {
+  transition: transform var(--ui-dur-normal) var(--ui-ease-standard);
+}
+.ui-modal-enter-from,
+.ui-modal-leave-to {
+  opacity: 0;
+}
+.ui-modal-enter-from .ui-modal-panel,
+.ui-modal-leave-to .ui-modal-panel {
+  transform: scale(0.97);
+}
+
+/* One window at a time. A window opened over a window comes in on its panel alone: the backdrop is
+   the tint the window under it had, there already. It leaves at once, and the window under it
+   rises back on its panel, so one window is seen at every moment and the tint never blinks. */
+.ui-modal-enter-from[data-swap] {
+  opacity: 1;
+}
+.ui-modal-enter-active[data-swap] .ui-modal-panel {
+  transition:
+    opacity var(--ui-dur-travel) var(--ui-ease-fade),
+    transform var(--ui-dur-travel) var(--ui-ease-fade);
+}
+.ui-modal-enter-from[data-swap] .ui-modal-panel {
+  opacity: 0;
+}
+.ui-modal-leave-active[data-swap] {
+  visibility: hidden;
+  transition: none;
+}
+.ui-modal-return {
+  animation: ui-modal-return var(--ui-dur-travel) var(--ui-ease-fade);
+}
+@keyframes ui-modal-return {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+/* A drawer: the backdrop fades, the panel travels its own width from the end edge. */
+.ui-drawer-enter-active .ui-drawer-backdrop {
+  transition: opacity var(--ui-dur-travel) var(--ui-ease-fade);
+}
+.ui-drawer-leave-active .ui-drawer-backdrop {
+  transition: opacity var(--ui-dur-normal) var(--ui-ease-standard);
+}
+.ui-drawer-enter-active .ui-drawer-panel {
+  transition: transform var(--ui-dur-travel) var(--ui-ease-enter);
+}
+.ui-drawer-leave-active .ui-drawer-panel {
+  transition: transform var(--ui-dur-normal) var(--ui-ease-exit);
+}
+/* The root carries a transition only so Vue waits for the panel before it unmounts. */
+.ui-drawer-enter-active,
+.ui-drawer-leave-active {
+  transition: opacity var(--ui-dur-travel);
+}
+.ui-drawer-leave-active {
+  pointer-events: none;
+}
+.ui-drawer-enter-from .ui-drawer-backdrop,
+.ui-drawer-leave-to .ui-drawer-backdrop {
+  opacity: 0;
+}
+.ui-drawer-enter-from .ui-drawer-panel,
+.ui-drawer-leave-to .ui-drawer-panel {
+  transform: translateX(100%);
+}
+[dir='rtl'] .ui-drawer-enter-from .ui-drawer-panel,
+[dir='rtl'] .ui-drawer-leave-to .ui-drawer-panel {
+  transform: translateX(-100%);
+}
+
+/* A step inside a drawer: the header stays, the body comes in from the side it goes. */
+.ui-drawer-step-in {
+  animation: ui-drawer-step-in var(--ui-dur-travel) var(--ui-ease-enter);
+}
+.ui-drawer-step-out {
+  animation: ui-drawer-step-out var(--ui-dur-travel) var(--ui-ease-enter);
+}
+@keyframes ui-drawer-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+}
+@keyframes ui-drawer-step-out {
+  from {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+  }
+}
+/* Right to left the way in comes from the other side. */
+[dir='rtl'] .ui-drawer-step-in {
+  animation-name: ui-drawer-step-out;
+}
+[dir='rtl'] .ui-drawer-step-out {
+  animation-name: ui-drawer-step-in;
+}
+
+/* A row that just came, or that a repeat points at: a moment of brand, fading to the row's own ground. */
+.ui-row-lit {
+  animation: ui-row-lit 1.2s var(--ui-ease-standard);
+}
+@keyframes ui-row-lit {
+  from {
+    background-color: var(--color-brand-subtle);
+  }
+}
+
+/* A refused close: a short shake says "not now" where silence reads as a hang. */
+.ui-shake {
+  animation: ui-shake 400ms var(--ui-ease-standard);
+}
+@keyframes ui-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes ui-refuse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-danger) 0%, transparent);
+  }
+  30%,
+  70% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-danger) 50%, transparent);
+  }
+}
+
+/* A toast arrives from below the stack and fades out where it stands; its place in the
+   pile is an inline transform, so entering changes opacity only. */
+.ui-toast-enter-active {
+  transition: opacity var(--ui-dur-normal) var(--ui-ease-enter);
+}
+.ui-toast-leave-active {
+  transition: opacity var(--ui-dur-fast) var(--ui-ease-exit);
+}
+.ui-toast-enter-from,
+.ui-toast-leave-to {
+  opacity: 0;
+}
+
+/* The time a toast with an action has left: a pale haze drains from its end to its start over its
+   whole stay, and stands still while the toaster holds the clocks. Under reduced motion the floor
+   ends it at once and the toaster says the seconds left instead. */
+@keyframes ui-toast-time {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.ui-toast-time {
+  animation: ui-toast-time linear forwards;
+  transform-origin: left;
+}
+[dir='rtl'] .ui-toast-time {
+  transform-origin: right;
+}
+
+/* A wait of unknown length: a band runs along the progress track, from the start side. */
+@keyframes ui-progress-run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+.ui-progress-run {
+  animation: ui-progress-run 1.2s var(--ui-ease-standard) infinite;
+}
+[dir='rtl'] .ui-progress-run {
+  animation-direction: reverse;
+}
+
+/* The eases are Tailwind's namespace (`ease-standard`); a duration has none, so each is a utility. */
+@theme {
+  --ease-standard: var(--ui-ease-standard);
+  --ease-enter: var(--ui-ease-enter);
+  --ease-exit: var(--ui-ease-exit);
+}
+@utility duration-fast {
+  --tw-duration: var(--ui-dur-fast);
+  transition-duration: var(--ui-dur-fast);
+}
+@utility duration-normal {
+  --tw-duration: var(--ui-dur-normal);
+  transition-duration: var(--ui-dur-normal);
+}
+@utility duration-travel {
+  --tw-duration: var(--ui-dur-travel);
+  transition-duration: var(--ui-dur-travel);
+}
+@utility duration-scene {
+  --tw-duration: var(--ui-dur-scene);
+  transition-duration: var(--ui-dur-scene);
+}

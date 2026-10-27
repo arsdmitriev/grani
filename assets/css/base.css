@@ -1,0 +1,144 @@
+/*
+ * grani-ui/base.css: a base for the whole app, optional. It gives the app's own elements what grani's
+ * already have from `grani-ui/style.css`: one border color, a pointer on what can be pressed, the
+ * focus ring of the library, thin scrollbars, the font's rendering and the brand as the accent of
+ * native controls. Close to the base Tailwind 3 had. grani renders the same without it.
+ *
+ * In the app, after the stylesheet: `@import 'tailwindcss'; @import 'grani-ui/style.css';
+ * @import 'grani-ui/base.css';`. Every rule sits in Tailwind's base layer, where any utility of the
+ * app on its own element wins over it.
+ */
+
+/* Tailwind 4 leaves a border in currentColor and a button with the arrow cursor; this keeps one
+   border color and a pointer on anything pressable, as every product expects. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+  }
+  button:not(:disabled, [aria-disabled='true']),
+  [role='button']:not(:disabled, [aria-disabled='true']) {
+    cursor: pointer;
+  }
+}
+
+/*
+ * Focus contract. One rule for every interactive element: a neutral halo,
+ * red for `[data-focus='danger']`. Fields show it on :focus (you live in a
+ * field while typing); everything else only on :focus-visible.
+ * Any utility of the app (`focus:border-red-500`, `focus-visible:ring-2`) on its own element wins
+ * over it. Inside the layer, selectors start with `:root` to outweigh CSS reset plugins that style
+ * the same attribute selectors in the same layer.
+ */
+@layer base {
+  :root [type='text']:focus,
+  :root [type='email']:focus,
+  :root [type='password']:focus,
+  :root [type='search']:focus,
+  :root [type='number']:focus,
+  :root [type='url']:focus,
+  :root [type='tel']:focus,
+  :root [type='date']:focus,
+  :root [type='time']:focus,
+  :root textarea:focus,
+  :root select:focus {
+    outline: none;
+    box-shadow: var(--ui-ring);
+    border-color: var(--color-border-strong);
+  }
+
+  :root [aria-invalid='true']:focus {
+    border-color: var(--color-danger);
+  }
+
+  :root
+    :where(
+      a[href],
+      button,
+      summary,
+      [role='switch'],
+      [role='tab'],
+      [tabindex]:not([tabindex='-1'])
+    ):focus-visible {
+    outline: none;
+    box-shadow: var(--ui-ring);
+  }
+
+  /* A menu item shows its focus as the lit band of a list, not as a ring round a row. */
+  :root [role='menuitem']:focus-visible {
+    box-shadow: none;
+  }
+
+  /* Attribute selectors carry their own weight here so they beat a reset
+     plugin's `[type='checkbox']:focus` of the same specificity. */
+  :root [type='checkbox']:focus-visible,
+  :root [type='radio']:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-ring);
+  }
+
+  :root [data-focus='danger']:focus-visible {
+    box-shadow: var(--ui-ring-danger);
+  }
+
+  /* Every scroll looks the same: a thin bar, a clear track, a thumb in the strong border color
+     that darkens under the pointer. The standard properties are enough for Firefox and Chromium;
+     the -webkit- pseudo elements are for Safari. Taps on iOS do not flash a gray box over
+     controls. */
+  :root {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background: var(--color-border-strong) padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-fg-subtle) padding-box;
+  }
+
+  /* Root: inherited by portals mounted next to the app, not only inside it. */
+  :root {
+    /* grani's font for the whole page: style.css gives it to grani's elements alone. */
+    font-family: var(--font-grani);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Theme switches by class, so the scheme is declared per class too. */
+    color-scheme: light;
+    accent-color: var(--color-brand);
+  }
+  :root.dark {
+    color-scheme: dark;
+  }
+}
+
+/* Forced colors drop fills and shadows, and the focus contract above takes the outline away: the
+   outline comes back as the floor of every focusable element. */
+@layer base {
+  @media (forced-colors: active) {
+    :where(
+      a[href],
+      button,
+      summary,
+      input,
+      select,
+      textarea,
+      [tabindex]:not([tabindex='-1'])
+    ):focus-visible {
+      outline: 2px solid;
+      outline-offset: 1px;
+    }
+  }
+}

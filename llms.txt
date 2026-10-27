@@ -1,0 +1,153 @@
+# grani-ui
+
+> Screens built with grani behave alike: the focus comes back where it was, a late answer never replaces a newer search, typed text that failed to add comes back to its field.
+> The interaction patterns below say how, most of them proved by a test.
+
+Version 0.1.0. Interaction patterns for admin apps, and the Vue 3 components that keep them: focus, late answers, loading, errors. Most proved by a test. Tailwind CSS 4, typed, SSR-ready.
+
+## How to use this reference
+
+1. Check the installed grani-ui version (`npm ls grani-ui`); this text is 0.1.0.
+2. Choose components from the catalog, or start from the task below.
+3. Read a component's page before writing code: its whole example, its API and what it leaves to the app.
+4. Use only the documented props, events and slots.
+5. When the components make a screen together, read the patterns for what the person does there: focus, errors, waiting, closing.
+
+## Setup
+
+Vue 3 components as a plain package: `npm i grani-ui`, then `app.use(createGrani())`. Tailwind 4.1.0 or later: `@import 'tailwindcss'; @import 'grani-ui/style.css';` in the app's stylesheet (the theme and the sources come with it; it styles grani's elements only, and `@import 'grani-ui/base.css';` after it is an optional base for the app's own). Components are imported from `grani-ui` (`import { UiButton } from 'grani-ui'`) or resolved in templates as <UiName> by `GraniResolver` from `grani-ui/resolver` through unplugin-vue-components.
+
+Brand: override the eight `--color-brand*` variables in your own stylesheet, below the imports, in `:root` for the light theme and again in `.dark` for the dark one; never edit the package's files. Shape: the `--radius-*` variables. Gutters: `--space-overlay`, `--space-surface`, `--space-surface-md`, `--space-drawer`. The dark theme is the `dark` class on `<html>`. Guides: https://grani.arseni.work/guide/theming.md and https://grani.arseni.work/guide/dark-mode.md
+
+Colors in the app's own markup: the theme's classes, which follow the brand and the dark theme. The page `bg-bg`; a panel `bg-surface`, a quieter one `bg-surface-muted`; words `text-fg`, quieter words `text-fg-muted` (`text-fg-subtle` is for a mark beside them, an icon or a dot, never for words to read: 2.5:1 on white); a line `border-border`; a state `text-danger`, `bg-success-subtle` and their kin for `danger`, `warning`, `success` and `info`; never Tailwind's raw palette (`bg-neutral-50`, `text-gray-500`) or a hex, which stay the same in the dark theme and under any brand.
+
+Language: `createGrani({ locale, translate })`. `locale` is a BCP 47 tag, or a ref or getter of one, and drives dates, numbers, money and plural forms; `translate(key, params)` returns the app's text for grani's keys, or nothing (or the key itself) to keep grani's English. `grani-ui/i18n` exports `en` and `ru`, grani's keys with their text, to feed into the app's own i18n, or `translate: (key) => ru[key]` without one.
+
+Size: `createGrani({ size: 'xs' | 'sm' | 'md' })` sets the size of every control without a size of its own; `grani.setSize()` changes it later. Zone and money: `createGrani({ timeZone, currency })`, `grani.setTimeZone()`, `grani.setCurrency()`.
+
+Links and server values: `createGrani({ link, shared })`. `link` is the component that draws a link to the app's own paths (unset, `RouterLink` when the app has a router, else a plain anchor); `shared` is the values a server wrote into the page with `sharedSnapshot(app)`, so the first render reads the same.
+
+Helpers the entry exports: `rangeFor(preset, today)` gives the days of a named period (`{ from, to }`, whole months), `periodBounds(period, { timeZone, locale, min, max })` the moments it covers for a query (`at >= start && at < end`, the last day whole, by the app's clock, a named period counted from today with the filter's window), and `RANGE_PRESETS` the periods in the order a UiDateRange panel lists them, for the app's own query; `formatChartValue(useUiT(), value, format)` writes a value and `parseChartDate(value)` reads a point of a time axis the way the charts do, for a headline or a tooltip of the app's own.
+
+Outside a component (a router guard, a timer): `grani.toast` and `grani.confirm`, the instance's own `useToast()` and `useConfirm()`; inside one, `useGrani()` returns the instance.
+
+## Start from the task
+
+- A list of records with search, filters, selection and pages: `UiDataTable`.
+- A record edited in a side panel, with Save: `UiCrudDrawer`.
+- A field with its label, hint and error: `UiField` around the control (`UiInput`, `UiSelect`, `UiDatePicker`...).
+- A question before an action that cannot come back: `UiConfirm`, or `useConfirm()`.
+- The outcome of an action: `useToast()`, with `UiToaster` mounted once.
+- Settings as rows: `UiList` with `UiListItem`, in a `UiCard`.
+- A figure over time in a card: `UiChartCard` around `UiAreaChart`, `UiBarChart` or `UiSparkline`.
+
+## Common mistakes
+
+- Import components from `grani-ui`; use only the documented entry points (`grani-ui`, `grani-ui/resolver`, `grani-ui/i18n`, `grani-ui/test`, `grani-ui/style.css`, `grani-ui/base.css`, `grani-ui/theme.css` with `grani-ui/classes/<Name>.css` per component).
+- Set up auto-imports (`GraniResolver`) before using components without an import.
+- With `grani-ui/theme.css`, import `grani-ui/classes/<Name>.css` for every component the app uses: a component without its file renders without its styles. Never point `@source` into `node_modules/grani-ui`: Tailwind then scans the whole folder, every component with it.
+- Mount `UiToaster` once when using `useToast()`, and `UiConfirm` once when using `useConfirm()`.
+- Under Yarn Plug'n'Play keep grani unpacked, as its package asks (`preferUnplugged`): kept in a zip, its files reach the development server but not the production build, and the components ship unstyled with no warning.
+- Import Tailwind without `prefix()`: with it the build stays green and the components show unstyled (with `grani-ui/style.css`, `createGrani()` warns in the browser's console in development).
+- Keep an empty string and `null` apart where a component documents the difference.
+- Check each component's props in its API; do not borrow prop names from another UI library.
+- Components do no requests: the app fetches, saves, checks permissions and passes the data and the states in.
+- Leave no empty list at a dead end: give the step only the app knows, such as adding the first record or creating what was searched for, in UiDataTable's `#empty-actions` (UiTable's `#empty`), beside the table's own Clear search.
+
+## Interaction patterns
+
+126 interaction patterns, by what the person is doing, with explanations, who implements them and test references where available (111 of them have tests).
+
+- [Focus and navigation](node_modules/grani-ui/llms/patterns/opening.md): Where keyboard focus starts, how it moves, and where it returns.
+- [Closing panels](node_modules/grani-ui/llms/patterns/closing.md): Dismiss nested panels in order, the top one first, and leave the form behind them as it was.
+- [Forms and input](node_modules/grani-ui/llms/patterns/filling-in.md): Enter values, correct validation errors and submit a form.
+- [Search and selection](node_modules/grani-ui/llms/patterns/finding.md): Find options, filter rows and navigate long lists.
+- [Loading and feedback](node_modules/grani-ui/llms/patterns/waiting.md): Show progress, explain failures and confirm actions when needed.
+- [Working with records](node_modules/grani-ui/llms/patterns/working-the-list.md): Select rows, apply actions and move between records.
+- [The tests behind the patterns](node_modules/grani-ui/llms/patterns/tests.md): each named by its spec file and title, and `grani-ui/test`, to run some of them in your Playwright suite on your own screens.
+
+## Components
+
+A page per component: its whole example, its API, what it leaves to the app and the patterns it keeps.
+
+- [UiAppShell](node_modules/grani-ui/llms/components/app-shell.md): App shell (also app layout, sidebar layout, navigation shell). Organize an app around a sidebar for navigation and a main area for the page you are working on.
+- [UiAreaChart](node_modules/grani-ui/llms/components/area-chart.md): Area chart (also line chart, time series chart, trend chart). Follow values over time as lines and filled areas. Explore each point from the keyboard, with gaps shown as missing data rather than zero.
+- [UiAspectRatio](node_modules/grani-ui/llms/components/aspect-ratio.md): Aspect ratio (also media box, image placeholder). Reserve space for a photo or video before it loads, so nearby content stays in place.
+- [UiAvatar](node_modules/grani-ui/llms/components/avatar.md): Avatar (also user avatar, profile picture, initials). Recognize a person by their photo, with initials shown while the photo loads or if it is unavailable.
+- [UiBadge](node_modules/grani-ui/llms/components/badge.md): Badge (also chip, tag, pill, status label). Add a short status or tag beside an item, such as “Draft” or “Paid”.
+- [UiBarChart](node_modules/grani-ui/llms/components/bar-chart.md): Bar chart (also column chart, histogram). Compare amounts across periods with grouped or stacked bars and a plan line, with a marker for a period still in progress.
+- [UiButton](node_modules/grani-ui/llms/components/button.md): Button. Start an action and see when it is running, with further presses blocked while the button is loading.
+- [UiCopyButton](node_modules/grani-ui/llms/components/copy-button.md): Copy button (also copy to clipboard, clipboard button). Copy a value in one press and see whether it reached the clipboard.
+- [UiButtonGroup](node_modules/grani-ui/llms/components/button-group.md): Button group (also segmented buttons, joined buttons, split button). Keep related controls together, such as a main action and its menu or a field and its submit button.
+- [UiIconButton](node_modules/grani-ui/llms/components/icon-button.md): Icon button (also icon-only button, glyph button). Offer a compact action, such as Search or Close, with an icon and an accessible name for screen readers.
+- [UiCalendar](node_modules/grani-ui/llms/components/calendar.md): Calendar (also date grid, month view, inline calendar). Choose a day or date range from a month view, using the mouse or keyboard.
+- [UiCard](node_modules/grani-ui/llms/components/card.md): Card (also panel, section card). Group one part of a page into a card with a title, content and an optional footer.
+- [UiChartCard](node_modules/grani-ui/llms/components/chart-card.md): Chart card (also kpi card, stat card, metric card). Show a chart with its title and key number; the card keeps its space while loading and says when the result is empty or an update failed.
+- [UiCheckbox](node_modules/grani-ui/llms/components/checkbox.md): Checkbox (also check box, tick box). Choose yes or no by clicking the box or its label; the tick shows the value the app accepted.
+- [UiCodeInput](node_modules/grani-ui/llms/components/code-input.md): Code input (also otp input, one-time code input, pin input, verification code). Enter a one-time code by typing, pasting or, where the browser supports it, autofill from a message, and let the app know when the code is complete.
+- [UiConfirm](node_modules/grani-ui/llms/components/confirm.md): Confirm (also confirmation dialog, confirm dialog, alert dialog). Check a decision before an action that cannot be undone, and show progress while the confirmed action runs.
+- [UiCount](node_modules/grani-ui/llms/components/count.md): Count (also counter badge, count badge, notification count). Show a compact count beside a label, or a dot when only the presence of an update matters.
+- [UiCrudDrawer](node_modules/grani-ui/llms/components/crud-drawer.md): Crud drawer (also edit panel, record drawer, side form, detail panel). Edit a record beside its list and open related lists within the same panel.
+- [UiDataTable](node_modules/grani-ui/llms/components/data-table.md): Data table (also data grid, list page, crud table, admin table). Find and work with records in one place: search and filters above a table with selection and pages, and clear loading and error states.
+- [UiDatePicker](node_modules/grani-ui/llms/components/date-picker.md): Date picker (also date input, date field, calendar input). Type a date as your language writes it, or pick it from a calendar or a preset, while the field keeps a steady width.
+- [UiDateRange](node_modules/grani-ui/llms/components/date-range.md): Date range (also date range picker, period picker, period filter). Filter records by a period such as “This month”, which stays current, or choose two dates in either order.
+- [UiDelta](node_modules/grani-ui/llms/components/delta.md): Delta (also trend indicator, change indicator, percent change). See how much a value changed as a signed percentage, and whether the change is for the better.
+- [UiDonutChart](node_modules/grani-ui/llms/components/donut-chart.md): Donut chart (also pie chart, ring chart, share chart). Compare the parts of a total in a ring chart, with the total in the center and each part available from the keyboard.
+- [UiDrawer](node_modules/grani-ui/llms/components/drawer.md): Drawer (also side panel, sheet, off-canvas panel, slide-over). Read or edit details in a side panel without leaving the list or page behind it.
+- [UiDropzone](node_modules/grani-ui/llms/components/dropzone.md): Dropzone (also file upload, file input, drag and drop upload, uploader). Add files by dragging or browsing; a message names each file that cannot be added and says why.
+- [UiField](node_modules/grani-ui/llms/components/field.md): Field (also form field, form group, label with hint and error). Give a control its label, hint and error message, connected so a screen reader reads them with it.
+- [UiFilter](node_modules/grani-ui/llms/components/filter.md): Filter (also filter dropdown, faceted filter, filter button). Open filter choices from a toolbar button and narrow a list by one or more groups of options.
+- [UiFilterList](node_modules/grani-ui/llms/components/filter-list.md): Filter list (also checkbox list, multi-select list, option list). Narrow results by ticking options that apply at once; a search field appears when there are six or more.
+- [UiHeader](node_modules/grani-ui/llms/components/header.md): Header (also page header, section header, title bar). Introduce a page or section with a title, a short explanation and the actions available there.
+- [UiIndicator](node_modules/grani-ui/llms/components/indicator.md): Indicator (also notification dot, status dot, badge dot). Mark an item that needs attention with a count or dot in its corner.
+- [UiInput](node_modules/grani-ui/llms/components/input.md): Input (also text field, text input, number input, search field). Enter a single line of text, a password or a number in the app’s local format, such as 1 234,50 or 1,234.50.
+- [UiPasswordField](node_modules/grani-ui/llms/components/password-field.md): Password field (also password input, password generator). Set a new password by typing or generating one, check it on screen and copy it; a screen reader confirms the generation without reading the password.
+- [UiLink](node_modules/grani-ui/llms/components/link.md): Link (also hyperlink, anchor, text link). Follow an underlined link in text, marked when it opens a new tab.
+- [UiList](node_modules/grani-ui/llms/components/list.md): List (also list group, stack of rows). Present related rows in a card, separated by lines so each item is easy to distinguish.
+- [UiListField](node_modules/grani-ui/llms/components/list-field.md): List field (also tag input, token input, chips input, multi-value field). Search a list and add entries from one field. Paste a column to add several entries, and recover your text if adding fails.
+- [UiListItem](node_modules/grani-ui/llms/components/list-item.md): List item (also list row, setting row, cell). Show one row with a title and description and an action or value beside it.
+- [UiLog](node_modules/grani-ui/llms/components/log.md): Log (also timeline, activity log, history, audit log). Follow a record's history: who changed what and when, with complete old and new values shown together.
+- [UiMenu](node_modules/grani-ui/llms/components/menu.md): Menu (also dropdown menu, context menu, action menu). Open a menu of available actions, such as exporting records, changing a row or managing your account.
+- [UiModal](node_modules/grani-ui/llms/components/modal.md): Modal (also dialog, modal dialog, window). Complete a short task in a dialog, such as filling a form or reviewing a record's details.
+- [UiNoData](node_modules/grani-ui/llms/components/no-data.md): No data (also empty state, no results, placeholder message). Understand why an area is empty and what you can do next.
+- [UiPagination](node_modules/grani-ui/llms/components/pagination.md): Pagination (also pager, page navigation). Move between pages with Previous, Next and page numbers below a list or table.
+- [UiPopover](node_modules/grani-ui/llms/components/popover.md): Popover (also dropdown panel, flyout, popup). Open a small panel of options beside a button while keeping the rest of the page available.
+- [UiProgress](node_modules/grani-ui/llms/components/progress.md): Progress (also progress bar, loading bar). See how much of a task or target is complete when its progress can be measured.
+- [UiRadioGroup](node_modules/grani-ui/llms/components/radio-group.md): Radio group (also radio buttons, segmented control, option cards). Choose one answer from a short list, cards or a segmented bar; the whole row or card is the click target. Parts on this page: UiRadio.
+- [UiReveal](node_modules/grani-ui/llms/components/reveal.md): Reveal (also accordion, collapsible, disclosure, expandable section). Open details where you need them and collapse them again without leaving the page.
+- [UiScaleInput](node_modules/grani-ui/llms/components/scale-input.md): Scale input (also rating, nps scale, likert scale, score input). Give a rating on a short labeled scale and, where clearing is allowed, take it back by choosing the same value again.
+- [UiSelect](node_modules/grani-ui/llms/components/select.md): Select (also dropdown, combobox, autocomplete, searchable select). Search for and choose one or more options. Enter selects an option without also submitting the form.
+- [UiSeparator](node_modules/grani-ui/llms/components/separator.md): Separator (also divider, horizontal rule). Separate groups in a menu, toolbar or card with a simple dividing line.
+- [UiSkeleton](node_modules/grani-ui/llms/components/skeleton.md): Skeleton (also loading placeholder, shimmer, content placeholder). Show where content will appear while it loads, holding its space so the page around it moves less.
+- [UiSparkline](node_modules/grani-ui/llms/components/sparkline.md): Sparkline (also mini chart, trend line, inline chart). See a value's recent trend beside the number, with gaps where data is missing.
+- [UiSpinner](node_modules/grani-ui/llms/components/spinner.md): Spinner (also loader, loading indicator, activity indicator). Show that work is in progress where the surrounding component has no loading state of its own.
+- [UiStack](node_modules/grani-ui/llms/components/stack.md): Stack (also vertical stack, vstack, spacing scale). Arrange related content vertically or horizontally with consistent spacing between groups, headings and sections.
+- [UiStepper](node_modules/grani-ui/llms/components/stepper.md): Stepper (also quantity input, counter, plus minus input, numeric stepper). Count things with minus and plus, such as pieces in a cart or guests on a booking, or type the number when it is far from the current one.
+- [UiSwitch](node_modules/grani-ui/llms/components/switch.md): Switch (also toggle, toggle switch, on off switch). Change an on/off setting immediately, returning to the previous position if the app rejects the change.
+- [UiTable](node_modules/grani-ui/llms/components/table.md): Table (also simple table, grid, rows and columns). Compare records in columns, sort and select rows and act on a row, with clear states for loading, empty results and errors. Parts on this page: UiDateCell, UiMoneyCell.
+- [UiTableColumns](node_modules/grani-ui/llms/components/table-columns.md): Table columns (also column picker, column visibility, show hide columns). Choose which columns to show and keep that choice for later visits in the same browser.
+- [UiTableToolbar](node_modules/grani-ui/llms/components/table-toolbar.md): Table toolbar (also list toolbar, search and filters bar, table header bar). Keep search, filters and actions together above the table they affect.
+- [UiTabs](node_modules/grani-ui/llms/components/tabs.md): Tabs (also tab bar, tab strip, tabbed navigation). Switch between sections of the same screen without showing them all at once.
+- [UiTextarea](node_modules/grani-ui/llms/components/textarea.md): Textarea (also multiline input, text area). Write several lines, such as a note, address or biography, in a field that can grow with the text.
+- [UiTimePicker](node_modules/grani-ui/llms/components/time-picker.md): Time picker (also time input, time field). Choose hours and minutes or type a time such as 2:30p or 1430. A valid time is kept even if it is not among the listed options.
+- [UiToaster](node_modules/grani-ui/llms/components/toaster.md): Toaster (also toast, notifications, snackbar). See a short message about an action's progress or result, with an action such as Undo when available.
+- [UiTooltip](node_modules/grani-ui/llms/components/tooltip.md): Tooltip (also hint, hover hint). Get a short hint on hover, keyboard focus or tap; anything essential stays on the page outside the tooltip.
+- [UiTruncate](node_modules/grani-ui/llms/components/truncate.md): Truncate (also ellipsis, text overflow, truncated text). Keep a long value on one line with an ellipsis, and reveal the full text on hover or tap when it does not fit.
+
+## Guides
+
+The guides of the README, for people as for agents, beside this file:
+
+- [Brand](node_modules/grani-ui/docs/guides/brand.md): Set your brand by overriding the eight `--color-brand*` variables in your own stylesheet, after the imports, once for each theme.
+- [Dark mode](node_modules/grani-ui/docs/guides/dark-mode.md): The dark theme is the `dark` class on `<html>`: grani's colors swap under it, and `color-scheme` follows on grani's elements, or on the whole page with `grani-ui/base.css`.
+- [Install](node_modules/grani-ui/docs/guides/install.md): What the README's `## Use` leaves out: icons, Yarn Plug'n'Play, Tailwind's `prefix()`, the Tailwind CLI, and how to remove grani.
+- [Server rendering](node_modules/grani-ui/docs/guides/server-rendering.md): grani renders on a server and hydrates in the browser.
+- [Settings](node_modules/grani-ui/docs/guides/settings.md): The options of `createGrani`, all optional: the language, the size of the controls, the zone and the money, where overlays go, where view settings are kept, the link component and the focus ring.
+- [Styles](node_modules/grani-ui/docs/guides/styles.md): The stylesheet brings the design tokens with a default brand, the font, the motion vocabulary and the Tailwind 4 theme, and names its own files for the build.
+- [Translations](node_modules/grani-ui/docs/guides/translations.md): grani is a set of components, not an i18n system.
+- [Types](node_modules/grani-ui/docs/guides/types.md): The package is built: `dist` holds JavaScript with a declaration beside every file, one file per component, so an app bundles what it imports and type-checks the package under its own `tsconfig` without reading the sources.
+
+## Optional
+
+- [Everything above in one file](https://grani.arseni.work/llms-full.txt): every component with its example and API, and the patterns, on the site.
+- [The showcase](https://grani.arseni.work): every component live, in both themes.

@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": [],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "paths": {
+      "grani-ui": ["./index.ts"],
+      "grani-ui/i18n": ["./i18n/index.ts"],
+      "grani-ui/test": ["./test/index.ts"],
+      "grani-ui/resolver": ["./resolver.js"]
+    }
+  },
+  "include": [
+    "index.ts",
+    "plugin.ts",
+    "resolver.d.ts",
+    "components/**/*",
+    "composables/**/*",
+    "utils/**/*",
+    "i18n/**/*",
+    "types/**/*",
+    "test/types/**/*",
+    "test/index.ts",
+    "examples/**/*",
+    "demos/**/*"
+  ],
+  "exclude": ["**/*.spec.ts", "node_modules", "examples/**/dist"]
+}

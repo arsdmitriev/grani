@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "stripInternal": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "paths": {}
+  },
+  "include": [
+    "index.ts",
+    "plugin.ts",
+    "components/**/*",
+    "composables/**/*",
+    "utils/**/*",
+    "i18n/**/*",
+    "types/**/*",
+    "test/index.ts"
+  ],
+  "exclude": ["**/*.spec.ts", "node_modules", "demos", "examples"]
+}
